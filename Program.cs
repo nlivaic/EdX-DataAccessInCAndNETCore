@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MovieApp
 {
@@ -6,7 +8,7 @@ namespace MovieApp
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Module1Helper.SelfAssessment();
         }
     }
 }
