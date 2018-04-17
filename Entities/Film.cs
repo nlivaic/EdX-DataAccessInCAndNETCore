@@ -16,6 +16,7 @@ namespace MovieApp.Entities
         public string Description { get; set; }
         public int? ReleaseYear { get; set; }
         public string Rating { get; set; }
+        public int? Runtime { get; set; }
 
         public ICollection<FilmActor> FilmActor { get; set; }
         public ICollection<FilmCategory> FilmCategory { get; set; }

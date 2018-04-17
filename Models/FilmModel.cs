@@ -9,6 +9,6 @@ namespace MovieApp.Models
         public string Title { get; set; }
         public int? ReleaseYear { get; set; }
         public string Rating { get; set; }
-
+        public int? Runtime { get; set; }
     }
 }

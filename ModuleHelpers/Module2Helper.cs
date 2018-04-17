@@ -72,7 +72,6 @@ namespace MovieApp
                                                                        .Select(f => f.Copy<Film, FilmModel>());
             ConsoleTable.From(films).Write();
         }
-
         private static Expression<Func<Film, object>> GetSort(ConsoleKeyInfo keyInfo) {
             switch (keyInfo.Key) {
                 case ConsoleKey.I:
@@ -85,7 +84,6 @@ namespace MovieApp
                     return f => f.Title;
             }
         }
-
         public static void LinqBasics()
         {
             IEnumerable<ActorModel> actors = from a in MoviesContext.Instance.Actors
@@ -94,12 +92,10 @@ namespace MovieApp
                                            select a.Copy<Actor, ActorModel>();
             ConsoleTable.From(actors).Write();
         }
-
         public static void LambdaBasics()
         {
             // ...            
         }
-
         public static void LinqVsLambda()
         {
             Console.WriteLine("-----------------------GROUP---------------------------");
@@ -131,6 +127,30 @@ namespace MovieApp
                                                                 r => r.Code,
                                                                 (f, r) => new { f.Title, r.Code, r.Name });
             ConsoleTable.From(filmRatings).Write();
+        }
+        public static void MigrationAddColumn()
+        {
+            Film film = MoviesContext.Instance.Films.Where(f => f.Title.Contains("first avenger")).FirstOrDefault();
+            if (film != null) {
+                Console.WriteLine("Please enter movie runtime:");
+                int runtime = Console.ReadLine().ToInt();
+                film.Runtime = runtime;
+                MoviesContext.Instance.SaveChanges();
+            }
+            IEnumerable<FilmModel> films = MoviesContext.Instance.Films.Select(f => f.Copy<Film, FilmModel>());
+            ConsoleTable.From(films).Write();
+        }
+        public static void MigrationAddTable()
+        {
+            ApplicationUser user = new ApplicationUser {
+                UserName = "testuser",
+                InvalidLoginAttempts = 0
+            };
+            MoviesContext.Instance.ApplicationUsers.Add(user);
+            MoviesContext.Instance.SaveChanges();
+            
+            var users = MoviesContext.Instance.ApplicationUsers;
+            ConsoleTable.From(users).Write();
         }
     }
 }
