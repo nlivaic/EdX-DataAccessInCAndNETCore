@@ -8,7 +8,7 @@ namespace MovieApp
     {
         static void Main(string[] args)
         {
-            Module1Helper.SelfAssessment();
+            Module2Helper.Paging();
         }
     }
 }
