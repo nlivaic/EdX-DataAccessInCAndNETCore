@@ -85,5 +85,52 @@ namespace MovieApp
                     return f => f.Title;
             }
         }
+
+        public static void LinqBasics()
+        {
+            IEnumerable<ActorModel> actors = from a in MoviesContext.Instance.Actors
+                                            where a.FirstName.Contains("ar")
+                                          orderby a.FirstName descending
+                                           select a.Copy<Actor, ActorModel>();
+            ConsoleTable.From(actors).Write();
+        }
+
+        public static void LambdaBasics()
+        {
+            // ...            
+        }
+
+        public static void LinqVsLambda()
+        {
+            Console.WriteLine("-----------------------GROUP---------------------------");
+            var actorGroups = MoviesContext.Instance.Actors
+                                               .GroupBy(a => a.FirstName[0]);
+            foreach (var actorGroup in actorGroups)
+            {
+                Console.WriteLine($"Group key: {actorGroup.Key}");
+                foreach (var actor in actorGroup) {
+                    Console.WriteLine($"\tActor: {actor.LastName}");
+                }
+            }
+            Console.WriteLine("-----------------------JOIN Linq query syntax---------------------------");
+            var ratings = new[] {
+            new { Code = "G", Name = "General Audiences"},
+            new { Code = "PG", Name = "Parental Guidance Suggested"},
+            new { Code = "PG-13", Name = "Parents Strongly Cautioned"},
+            new { Code = "R", Name = "Restricted"},
+            };
+
+            var filmRatings = from f in MoviesContext.Instance.Films
+                              join r in ratings on f.Rating equals r.Code
+                            select new { f.Title, r.Code, r.Name };
+            ConsoleTable.From(filmRatings).Write();
+
+            Console.WriteLine("-----------------------JOIN Linq method syntax--------------------------");
+            filmRatings = MoviesContext.Instance.Films.Join(ratings, 
+                                                                f => f.Rating,
+                                                                r => r.Code,
+                                                                (f, r) => new { f.Title, r.Code, r.Name });
+            ConsoleTable.From(filmRatings).Write();
+        }
     }
 }
