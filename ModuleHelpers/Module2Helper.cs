@@ -152,5 +152,15 @@ namespace MovieApp
             var users = MoviesContext.Instance.ApplicationUsers;
             ConsoleTable.From(users).Write();
         }
+        public static void CompositeKeys()
+        {
+            var data = new[] {
+                new FilmInfo { Title = "Thor", ReleaseYear = 2011, Rating = "PG-13" },
+                new FilmInfo { Title = "The Avengers", ReleaseYear = 2012, Rating = "PG-13" },
+                new FilmInfo { Title = "Rogue One", ReleaseYear = 2016, Rating = "PG-13" }
+            };
+            MoviesContext.Instance.FilmInfos.AddRange(data);
+            MoviesContext.Instance.SaveChanges();
+        }
     }
 }
