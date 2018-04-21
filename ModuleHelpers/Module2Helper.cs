@@ -160,7 +160,64 @@ namespace MovieApp
                 new FilmInfo { Title = "Rogue One", ReleaseYear = 2016, Rating = "PG-13" }
             };
             MoviesContext.Instance.FilmInfos.AddRange(data);
+            // Will throw an exception due to duplicate keys being inserted.
             MoviesContext.Instance.SaveChanges();
+        }
+        /// <summary>
+        /// Enhanced Actors paging system.
+        /// Sort by any column in ascending or descending order.
+        /// </summary>
+        public static void SelfAssessment()
+        {
+            Console.WriteLine("Page size: ");
+            int pageSize = Console.ReadLine().ToInt();
+            
+            Console.WriteLine("Page number: ");
+            int pageNumber = Console.ReadLine().ToInt();
+
+            Console.WriteLine("Sort column: ");
+            Console.WriteLine("\ti - Actor Id: ");
+            Console.WriteLine("\tf - First Name: ");
+            Console.WriteLine("\tl - Last Name: ");
+            Func<Actor, object> sortColumn = GetActorSortColumn(Console.ReadKey());
+
+            Console.WriteLine("Enter a sort order: ");
+            Console.WriteLine("\ta - Ascending order: ");
+            Console.WriteLine("\td - Descending order: ");
+            ConsoleKeyInfo orderByDynamicKeyInfo = Console.ReadKey();
+
+            IEnumerable<ActorModel> actors = MoviesContext.Instance.Actors.OrderByDynamic(sortColumn, orderByDynamicKeyInfo)
+                                                                          .Skip(-(pageNumber - 1) * pageSize)
+                                                                          .Take(pageSize)
+                                                                          .Select(a => a.Copy<Actor, ActorModel>());
+            ConsoleTable.From(actors).Write();
+        }
+
+        private static Func<Actor, object> GetActorSortColumn(ConsoleKeyInfo keyInfo)
+        {
+            switch (keyInfo.Key)
+            {
+                case ConsoleKey.I:
+                    return a => a.ActorId;
+                case ConsoleKey.F:
+                    return a => a.FirstName;
+                case ConsoleKey.L:
+                    return a => a.LastName;
+                default:
+                    throw new ArgumentException($"Unknown key: {keyInfo.KeyChar}.");
+            }
+        }
+        private static IOrderedEnumerable<Actor> OrderByDynamic(this IEnumerable<Actor> source, Func<Actor, object> keySelector, ConsoleKeyInfo keyInfo)
+        {
+            switch (keyInfo.Key)
+            {
+                case ConsoleKey.A:
+                    return source.OrderBy(keySelector);
+                case ConsoleKey.D:
+                    return source.OrderByDescending(keySelector);
+                default:
+                    throw new ArgumentException($"Unknown key: {keyInfo.KeyChar}.");
+            }
         }
     }
 }
