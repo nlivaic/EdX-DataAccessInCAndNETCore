@@ -1,6 +1,10 @@
 ﻿using System;
+using Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace MovieApp.Entities
 {
@@ -22,6 +26,9 @@ namespace MovieApp.Entities
                 if (_context == null)
                 {
                     _context = new MoviesContext();
+                    var serviceProvider = _context.GetInfrastructure<IServiceProvider>();
+                    ILoggerFactory loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+                    loggerFactory.AddProvider(new MyLoggerProvider());
                 }
                 return _context;
             }
