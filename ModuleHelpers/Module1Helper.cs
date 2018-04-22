@@ -36,7 +36,7 @@ namespace MovieApp
             if (film == null) {
                 Console.WriteLine($"Film titled {title} not found.");
             } else {
-                Console.WriteLine($"Film id: {film.FilmId}, title: {title}, release year: {film.ReleaseYear}, rating: {film.Rating}. ");
+                Console.WriteLine($"Film id: {film.FilmId}, title: {title}, release year: {film.ReleaseYear}, rating: {film.RatingCode}. ");
             }
             
         }
@@ -67,7 +67,7 @@ namespace MovieApp
             Console.WriteLine("Enter a rating.");
             string rating = Console.ReadLine();
 
-            Film film = new Film { Title = title, Description = description, ReleaseYear = releaseYear, Rating = rating };
+            Film film = new Film { Title = title, Description = description, ReleaseYear = releaseYear, RatingCode = rating };
             MoviesContext.Instance.Films.Add(film);
             MoviesContext.Instance.SaveChanges();
 
@@ -124,8 +124,8 @@ namespace MovieApp
                 if (releaseYear > 0 && film.ReleaseYear != releaseYear) {
                     film.ReleaseYear = releaseYear;
                 }
-                if (!String.IsNullOrEmpty(rating) && film.Rating != rating) {
-                    film.Rating = rating;
+                if (!String.IsNullOrEmpty(rating) && film.RatingCode != rating) {
+                    film.RatingCode = rating;
                 }
                 MoviesContext.Instance.SaveChanges();
                 IEnumerable<FilmModel> filmModels = MoviesContext.Instance.Films.Where(f => f.FilmId == film.FilmId).Select(f => f.Copy<Film, FilmModel>());

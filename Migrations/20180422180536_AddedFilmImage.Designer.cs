@@ -11,9 +11,10 @@ using System;
 namespace MovieApp.Migrations
 {
     [DbContext(typeof(MoviesContext))]
-    partial class MoviesContextModelSnapshot : ModelSnapshot
+    [Migration("20180422180536_AddedFilmImage")]
+    partial class AddedFilmImage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,10 +83,8 @@ namespace MovieApp.Migrations
 
                     b.Property<int?>("FilmImageId");
 
-                    b.Property<string>("RatingCode")
+                    b.Property<string>("Rating")
                         .HasMaxLength(45);
-
-                    b.Property<int?>("RatingId");
 
                     b.Property<int?>("ReleaseYear")
                         .HasColumnType("int(11)");
@@ -98,10 +97,8 @@ namespace MovieApp.Migrations
 
                     b.HasKey("FilmId");
 
-                    b.HasIndex("RatingCode")
+                    b.HasIndex("Rating")
                         .HasName("film_rating_index");
-
-                    b.HasIndex("RatingId");
 
                     b.ToTable("film");
                 });
@@ -168,28 +165,6 @@ namespace MovieApp.Migrations
                     b.HasKey("Title", "ReleaseYear");
 
                     b.ToTable("filminfo");
-                });
-
-            modelBuilder.Entity("MovieApp.Entities.Rating", b =>
-                {
-                    b.Property<int>("RatingId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Code")
-                        .IsRequired();
-
-                    b.Property<string>("Name");
-
-                    b.HasKey("RatingId");
-
-                    b.ToTable("rating");
-                });
-
-            modelBuilder.Entity("MovieApp.Entities.Film", b =>
-                {
-                    b.HasOne("MovieApp.Entities.Rating", "Rating")
-                        .WithMany("Films")
-                        .HasForeignKey("RatingId");
                 });
 
             modelBuilder.Entity("MovieApp.Entities.FilmActor", b =>

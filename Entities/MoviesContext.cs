@@ -17,6 +17,8 @@ namespace MovieApp.Entities
         public virtual DbSet<FilmCategory> FilmCategories { get; set; }
         public virtual DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public virtual DbSet<FilmInfo> FilmInfos { get; set; }
+        public virtual DbSet<FilmImage> FilmImages { get; set; }
+        public virtual DbSet<Rating> Ratings { get; set; }
 
         private static MoviesContext _context;
         public static MoviesContext Instance
@@ -38,7 +40,7 @@ namespace MovieApp.Entities
         {
             if (!optionsBuilder.IsConfigured)
             {
-// #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                // #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
                 optionsBuilder.UseMySql("server=localhost;userid=root;pwd=rootpw;port=3306;database=Movies;sslmode=none;");
             }
         }
@@ -80,7 +82,7 @@ namespace MovieApp.Entities
 
                 entity.Property(e => e.Description).HasColumnType("text");
 
-                entity.Property(e => e.Rating).HasMaxLength(45);
+                entity.Property(e => e.RatingCode).HasMaxLength(45);
 
                 entity.Property(e => e.ReleaseYear).HasColumnType("int(11)");
 
@@ -88,8 +90,12 @@ namespace MovieApp.Entities
                     .IsRequired()
                     .HasMaxLength(255);
                 
-                entity.HasIndex(e => e.Rating)
+                entity.HasIndex(e => e.RatingCode)
                       .HasName("film_rating_index");
+
+                entity.HasOne(f => f.Rating)
+                      .WithMany(r => r.Films)
+                      .HasForeignKey(f => f.RatingId);
             });
 
             modelBuilder.Entity<FilmActor>(entity =>
@@ -147,6 +153,22 @@ namespace MovieApp.Entities
             modelBuilder.Entity<FilmInfo>(entity => 
             {
                 entity.HasKey(e => new { e.Title, e.ReleaseYear });
+            });
+
+            modelBuilder.Entity<FilmImage>(entity => 
+            {
+                entity.ToTable("FilmImage");
+                entity.HasKey(fi => fi.FilmImageId);
+                entity.HasOne(fi => fi.Film)
+                      .WithOne(f => f.FilmImage)
+                      .HasForeignKey<FilmImage>(fi => fi.FilmId);
+            });
+
+            modelBuilder.Entity<Rating>(entity => 
+            {
+                entity.ToTable("rating");
+                entity.HasKey(r => r.RatingId);
+                entity.Property(r => r.Code).IsRequired();
             });
         }
     }

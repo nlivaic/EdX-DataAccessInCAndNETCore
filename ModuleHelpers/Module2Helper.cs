@@ -19,7 +19,7 @@ namespace MovieApp
             ConsoleTable.From(actors).Write();
 
             /* Sort films. */
-            IEnumerable<FilmModel> films = MoviesContext.Instance.Films.OrderBy(f => f.Rating)
+            IEnumerable<FilmModel> films = MoviesContext.Instance.Films.OrderBy(f => f.RatingCode)
                                                                         .ThenBy(f => f.ReleaseYear)
                                                                         .ThenBy(f => f.Title)
                                                                         .Select(f => f.Copy<Film, FilmModel>());
@@ -33,7 +33,7 @@ namespace MovieApp
             ConsoleTable.From(actors).Write();
 
             /* Sort movies by descending then ascending. */
-            IEnumerable<FilmModel> films = MoviesContext.Instance.Films.OrderByDescending(f => f.Rating)
+            IEnumerable<FilmModel> films = MoviesContext.Instance.Films.OrderByDescending(f => f.RatingCode)
                                                                        .ThenBy(f => f.ReleaseYear)
                                                                        .Select(a => a.Copy<Film, FilmModel>());
             ConsoleTable.From(films).Write();
@@ -77,7 +77,7 @@ namespace MovieApp
                 case ConsoleKey.I:
                     return f => f.FilmId;
                 case ConsoleKey.R:
-                    return f => f.Rating;
+                    return f => f.RatingCode;
                 case ConsoleKey.Y:
                     return f => f.ReleaseYear;
                 default:
@@ -117,13 +117,13 @@ namespace MovieApp
             };
 
             var filmRatings = from f in MoviesContext.Instance.Films
-                              join r in ratings on f.Rating equals r.Code
+                              join r in ratings on f.RatingCode equals r.Code
                             select new { f.Title, r.Code, r.Name };
             ConsoleTable.From(filmRatings).Write();
 
             Console.WriteLine("-----------------------JOIN Linq method syntax--------------------------");
             filmRatings = MoviesContext.Instance.Films.Join(ratings, 
-                                                                f => f.Rating,
+                                                                f => f.RatingCode,
                                                                 r => r.Code,
                                                                 (f, r) => new { f.Title, r.Code, r.Name });
             ConsoleTable.From(filmRatings).Write();
