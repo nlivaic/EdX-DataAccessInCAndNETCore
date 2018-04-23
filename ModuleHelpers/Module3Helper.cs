@@ -81,7 +81,54 @@ namespace MovieApp
 
         public static void ManyToManySelect()
         {
-            Console.WriteLine(nameof(ManyToManySelect));
+            Console.WriteLine("--------------------------------------- LIST FILMS AND ACTORS -----------------------------------------");
+            IEnumerable<Film> films = MoviesContext.Instance.Films
+                                                            .Include(f => f.FilmActor)
+                                                            .ThenInclude(fa => fa.Actor);
+            foreach (Film film in films)
+            {
+                Console.WriteLine($"Film: {film.Title}");
+                foreach (FilmActor filmActor in film.FilmActor)
+                {
+                    Console.WriteLine($"\tActor: {filmActor.Actor.FirstName} {filmActor.Actor.LastName}");
+                }
+            }
+            Console.WriteLine("-------------------------------------- SORTED FILMS AND ACTORS ----------------------------------------");
+            films = MoviesContext.Instance.Films.OrderBy(f => f.Title)
+                                                .Include(f => f.FilmActor)
+                                                .ThenInclude(fa => fa.Actor);
+            foreach (Film film in films)
+            {
+                Console.WriteLine($"Film: {film.Title}");
+                foreach (FilmActor filmActor in film.FilmActor.OrderBy(fa => fa.Actor.LastName).ThenBy(fa => fa.Actor.FirstName))
+                {
+                    Console.WriteLine($"\tActor: {filmActor.Actor.FirstName} {filmActor.Actor.LastName}");
+                }
+            }
+            Console.WriteLine("----------------------------------------- ACTORS AND FILMS --------------------------------------------");
+            IEnumerable<Actor> actors = MoviesContext.Instance.Actors.Include(a => a.FilmActor)
+                                                                     .ThenInclude(fa => fa.Film);
+            foreach (Actor actor in actors)
+            {
+                Console.WriteLine($"Actor: {actor.FirstName} {actor.LastName}");
+                foreach (FilmActor filmActor in actor.FilmActor)
+                {
+                    Console.WriteLine($"\tFilm: {filmActor.Film.Title}");
+                }
+            }
+            Console.WriteLine("----------------------------------------- SORTED ACTORS AND FILMS --------------------------------------------");
+            actors = MoviesContext.Instance.Actors.OrderBy(a => a.LastName)
+                                                  .ThenBy(a => a.FirstName)
+                                                  .Include(a => a.FilmActor)
+                                                  .ThenInclude(fa => fa.Film);
+            foreach (Actor actor in actors)
+            {
+                Console.WriteLine($"Actor: {actor.FirstName} {actor.LastName}");
+                foreach (FilmActor filmActor in actor.FilmActor.OrderByDescending(fa => fa.Film.ReleaseYear))
+                {
+                    Console.WriteLine($"\tFilm: {filmActor.Film.ReleaseYear} {filmActor.Film.Title}");
+                }
+            }
         }
 
         public static void ManyToManyInsert()
