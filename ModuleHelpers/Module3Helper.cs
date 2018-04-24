@@ -133,7 +133,73 @@ namespace MovieApp
 
         public static void ManyToManyInsert()
         {
-            Console.WriteLine(nameof(ManyToManyInsert));
+            Console.WriteLine("----------------------------------------- ADD EXISTING ACTOR TO FILM --------------------------------------------");
+            int filmId = 12;
+            int actorId = 2;
+            Film film = MoviesContext.Instance.Films.Include(f => f.FilmActor).Single(f => f.FilmId == filmId);
+            Actor actor = MoviesContext.Instance.Actors.Single(a => a.ActorId == actorId);
+            if (film.FilmActor.All(fa => fa.ActorId != actorId))
+            {
+                FilmActor filmActor = new FilmActor {
+                    Actor = actor,
+                    Film = film
+                };
+                MoviesContext.Instance.FilmActors.Add(filmActor);
+                MoviesContext.Instance.SaveChanges();
+            }
+            Film film1 = MoviesContext.Instance.Films.Include(f => f.FilmActor)
+                                                    .ThenInclude(fa => fa.Actor)
+                                                    .SingleOrDefault(f => f.FilmId == filmId);
+            Console.WriteLine($"Film: {film1.Title}");
+            foreach (FilmActor filmActor1 in film1.FilmActor)
+            {
+                Console.WriteLine($"Actor: {filmActor1.Actor.ActorId} {filmActor1.Actor.LastName} {filmActor1.Actor.FirstName}");
+            }
+            Console.WriteLine("----------------------------------------- ADD NEW ACTOR TO FILM --------------------------------------------");
+            filmId = 12;
+            actor = new Actor { FirstName = "Stan", LastName = "Lee" };
+            film = MoviesContext.Instance.Films.Include(f => f.FilmActor)
+                                               .ThenInclude(fa => fa.Actor)
+                                               .Single(f => f.FilmId == filmId);
+            if (film.FilmActor.All(fa => fa.ActorId != actor.ActorId))
+            {
+                film.FilmActor.Add(new FilmActor {
+                    Actor = actor,
+                    Film = film
+                });
+                MoviesContext.Instance.SaveChanges();
+            }
+            film = MoviesContext.Instance.Films.Include(f => f.FilmActor)
+                                               .ThenInclude(fa => fa.Actor)
+                                               .Single(f => f.FilmId == filmId);
+            Console.WriteLine($"Film: {film1.Title}");
+            foreach (FilmActor filmActor1 in film.FilmActor)
+            {
+                Console.WriteLine($"Actor: {filmActor1.Actor.LastName} {filmActor1.Actor.FirstName}");
+            }
+            Console.WriteLine("----------------------------------------- ADD EXISTING FILM TO ACTOR --------------------------------------------");
+            filmId = 12;
+            actorId = 3;
+            actor = MoviesContext.Instance.Actors.Include(a => a.FilmActor)
+                                                 .Single(a => a.ActorId == actorId);
+            if (actor.FilmActor.All(fa => fa.FilmId != filmId))
+            {
+                FilmActor filmActor = new FilmActor {
+                    FilmId = filmId,    // Note we are using only film id, not the film itself. 
+                                        // This saves querying the film (as opposed to actor example two sections earlier).
+                    Actor = actor
+                };
+                actor.FilmActor.Add(filmActor);
+                MoviesContext.Instance.SaveChanges();
+            }
+            actor = MoviesContext.Instance.Actors.Include(a => a.FilmActor)
+                                                 .ThenInclude(fa => fa.Film)
+                                                 .Single(a => a.ActorId == actorId);
+            Console.WriteLine($"Actor: {actor.ActorId} {actor.FirstName} {actor.LastName}");
+            foreach (FilmActor filmActor1 in actor.FilmActor.OrderByDescending(fa => fa.FilmId))
+            {
+                Console.WriteLine($"\t{filmActor1.FilmId} {filmActor1.Film.FilmId} {filmActor1.Film.Title}");
+            }
         }
 
         public static void ManyToManyDelete()
