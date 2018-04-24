@@ -204,7 +204,114 @@ namespace MovieApp
 
         public static void ManyToManyDelete()
         {
-            Console.WriteLine(nameof(ManyToManyDelete));
+            Console.WriteLine("---------------------------------------------DELETING WITH ENTITIES---------------------------------------------");
+            // Fetch.
+            FilmActor filmActor = GetRandomFilmActor();
+            int filmId = filmActor.FilmId;
+            int actorId = filmActor.ActorId;
+            Write(filmActor);
+            // Delete.
+            FilmActor entity = MoviesContext.Instance.FilmActors.Single(fa => fa.ActorId == actorId && fa.FilmId == filmId);
+            MoviesContext.Instance.FilmActors.Remove(entity);
+            MoviesContext.Instance.SaveChanges();
+            filmActor = MoviesContext.Instance.FilmActors.SingleOrDefault(fa => fa.ActorId == actorId && fa.FilmId == filmId);
+            Write(filmActor);
+            // Insert back again.
+            MoviesContext.Instance.Add(new FilmActor {
+                FilmId = filmId,
+                ActorId = actorId
+            });
+            MoviesContext.Instance.SaveChanges();
+            filmActor = MoviesContext.Instance.FilmActors.SingleOrDefault(fa => fa.ActorId == actorId && fa.FilmId == filmId);
+            Write(filmActor);
+            
+            Console.WriteLine("---------------------------------------------DELETING WITH ONE ENTITY AND ONE ID VALUE---------------------------------------------");
+            // We will use the Film and ActorId properties to delete the entity.
+            // Fetch.
+            filmActor = GetRandomFilmActor();
+            filmId = filmActor.FilmId;
+            actorId = filmActor.ActorId;
+            Write(filmActor);
+            // Delete.
+            Film film = MoviesContext.Instance.Films.Single(f => f.FilmId == filmId);
+            entity = new FilmActor {
+                Film = film,
+                ActorId = actorId
+            };
+            MoviesContext.Instance.FilmActors.Remove(entity);
+            MoviesContext.Instance.SaveChanges();
+            filmActor = MoviesContext.Instance.FilmActors.SingleOrDefault(fa => fa.ActorId == actorId && fa.FilmId == filmId);
+            Write(filmActor);
+            // Insert back again.
+            filmActor = new FilmActor {
+                Film = film,
+                ActorId = actorId
+            };
+            MoviesContext.Instance.FilmActors.Add(filmActor);
+            MoviesContext.Instance.SaveChanges();
+            filmActor = MoviesContext.Instance.FilmActors.SingleOrDefault(fa => fa.ActorId == actorId && fa.FilmId == filmId);
+            Write(filmActor);
+            Console.WriteLine("---------------------------------------------DELETING WITH ID VALUES---------------------------------------------");
+            // We will use the FilmId and ActorId properties to delete the entity.
+            // Fetch.
+            filmActor = GetRandomFilmActor();
+            filmId = filmActor.FilmId;
+            actorId = filmActor.ActorId;
+            Write(filmActor);
+            // Delete.
+            entity = new FilmActor
+            {
+                FilmId = filmId,
+                ActorId = actorId
+            };
+            MoviesContext.Instance.FilmActors.Remove(entity);
+            MoviesContext.Instance.SaveChanges();
+            filmActor = MoviesContext.Instance.FilmActors.SingleOrDefault(fa => fa.ActorId == actorId && fa.FilmId == filmId);
+            Write(filmActor);
+            // Insert back again.
+            MoviesContext.Instance.FilmActors.Add(
+                new FilmActor
+                {
+                    FilmId = filmId,
+                    ActorId = actorId
+                }
+            );
+            MoviesContext.Instance.SaveChanges();
+            filmActor = MoviesContext.Instance.FilmActors.Single(fa => fa.ActorId == actorId && fa.FilmId == filmId);
+            Write(filmActor);
+        }
+
+        private static void Write(FilmActor filmActor)
+        {
+            if (filmActor == null)
+            {
+                Console.WriteLine("Film Actor Not Found");
+                return;
+            }
+            Film film = filmActor.Film;
+            Actor actor = filmActor.Actor;
+            if (film == null)
+            {
+                film = MoviesContext.Instance.Films.Single(f => f.FilmId == filmActor.FilmId);
+            }
+            if (actor == null)
+            {
+                actor = MoviesContext.Instance.Actors.Single(a => a.ActorId == filmActor.ActorId);
+            }
+            Console.WriteLine($"Film: {film.FilmId}  -  {film.Title}\t Actor: {actor.ActorId}  -  {actor.FirstName} {actor.LastName}");
+        }
+        private static FilmActor GetRandomFilmActor()
+        {
+            int count = MoviesContext.Instance.FilmActors.Count();
+            var skip = new Random().Next(0, count);
+            return MoviesContext.Instance.FilmActors
+                        .Skip(skip)
+                        .Select(fa => new FilmActor
+                        {
+                            FilmId = fa.FilmId,
+                            ActorId = fa.ActorId
+                        })
+                        .First();
         }
     }
 }

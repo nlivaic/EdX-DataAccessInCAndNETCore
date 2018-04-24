@@ -8,7 +8,7 @@ namespace MovieApp
     {
         static void Main(string[] args)
         {
-            Module3Helper.ManyToManyInsert();
+            Module3Helper.ManyToManyDelete();
         }
     }
 }
