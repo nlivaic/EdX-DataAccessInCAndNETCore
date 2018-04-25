@@ -6,6 +6,7 @@ using MovieApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace MovieApp
 {
@@ -375,5 +376,59 @@ namespace MovieApp
                 }
             }
         }
+
+        public static void SelfAssessment()
+        {
+            int ratingId = 3;
+            Rating rating = MoviesContext.Instance.Ratings.Include(r => r.Films)
+                                                          .Single(r => r.RatingId == ratingId);
+            Console.WriteLine($"Rating: {rating.Name}");
+            foreach (Film film in rating.Films)
+            {
+                film.Title = (film.FilmId % 2 == 1 ? "odd " : "even ") + film.Title;
+            }
+            MoviesContext.Instance.SaveChanges();
+            // Console.WriteLine($"-------------------------------------------CATEGORIES AND MOVIES AFTER CHANGE-----------------------------------------");
+            // IEnumerable<Category> categories = MoviesContext.Instance.Categories.Include(c => c.FilmCategory)
+            //                                                                     .ThenInclude(fc => fc.Film);
+            // foreach (Category category in categories)
+            // {
+            //     Console.WriteLine($"Category: {category.CategoryId} {category.Name}");
+            //     foreach (FilmCategory filmCategory in category.FilmCategory)
+            //     {
+            //         Console.WriteLine($"\t{filmCategory.Film.FilmId} {filmCategory.Film.Title}");
+            //     }
+            // }
+            Console.WriteLine($"-------------------------------------------RATINGS AND MOVIES AFTER CHANGE-----------------------------------------");
+            IEnumerable<Rating> ratings = MoviesContext.Instance.Ratings.Include(r => r.Films);
+            foreach (Rating rating1 in ratings)
+            {
+                Console.WriteLine($"Rating: {rating1.Name}");
+                foreach (Film film1 in rating1.Films)
+                {
+                    Console.WriteLine($"\t{film1.FilmId} {film1.Title}");
+                }
+            }
+            Console.WriteLine($"--------------------------------------REVERT FILM TITLES-----------------------------------");
+            rating = MoviesContext.Instance.Ratings.Include(r => r.Films).Single(r => r.RatingId == ratingId);
+            foreach (Film film in rating.Films)
+            {
+                film.Title = Regex.Replace(film.Title, "^odd |^even ", String.Empty);
+            }
+            MoviesContext.Instance.SaveChanges();
+            Console.WriteLine($"-------------------------------------------RATINGS AND MOVIES ORIGINAL-----------------------------------------");
+            ratings = MoviesContext.Instance.Ratings.Include(r => r.Films);
+            foreach (Rating rating1 in ratings)
+            {
+                Console.WriteLine($"Rating: {rating1.Name}");
+                foreach (Film film1 in rating1.Films)
+                {
+                    Console.WriteLine($"\t{film1.FilmId} {film1.Title}");
+                }
+            }
+            Console.WriteLine($"----------------------------------------FILMS RELEASED ON EVEN NUMBER YEAR--------------------------------------");
+            IEnumerable<Film> evenYearFilms = MoviesContext.Instance.Films.Where(f => f.ReleaseYear % 2 == 0);
+            ConsoleTable.From(evenYearFilms).Write();
+        }        
     }
 }
