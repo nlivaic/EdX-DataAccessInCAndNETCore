@@ -349,12 +349,31 @@ namespace MovieApp
 
         public static void EagerLoadFilm()
         {
-            Console.WriteLine(nameof(EagerLoadFilm));
+            
+            Console.WriteLine("---------------------------------------------DISPLAY FILM AND ACTORS---------------------------------------------");
+            
         }
 
         public static void EagerLoadCategory()
         {
-            Console.WriteLine(nameof(EagerLoadCategory));
+            var categories = MoviesContext.Instance.Categories.Include(c=>c.FilmCategory)
+                                                              .ThenInclude(fc=>fc.Film);
+            foreach (var category in categories)
+            {
+                Console.WriteLine($"Category: {category.CategoryId} - {category.Name}");
+                if (category.FilmCategory.Any())
+                {
+                    foreach (var filmCategory in category.FilmCategory)
+                    {
+                        MoviesContext.Instance.Entry(filmCategory).Reference(fc => fc.Film);
+                        Console.WriteLine($"\t{filmCategory.Film.FilmId} - {filmCategory.Film.Title}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("\tNo Films");
+                }
+            }
         }
     }
 }
