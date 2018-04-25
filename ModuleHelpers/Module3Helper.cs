@@ -313,5 +313,48 @@ namespace MovieApp
                         })
                         .First();
         }
+        public static void LazyLoadFilm()
+        {
+            Console.WriteLine("---------------------------------------------LAZY LOAD ACTORS FOR FILM---------------------------------------------");
+            int filmId = 12;
+            Film film = MoviesContext.Instance.Films.Single(f => f.FilmId == filmId);
+            MoviesContext.Instance.Entry(film).Collection(f => f.FilmActor).Load();
+            Console.WriteLine($"From Film: {film.FilmId} {film.Title}");
+            foreach (FilmActor filmActor in film.FilmActor)
+            {
+                MoviesContext.Instance.Entry(filmActor).Reference(fa => fa.Actor).Load();
+                Console.WriteLine($"\tFrom FilmActor: {filmActor.ActorId} {filmActor.FilmId}");
+                Console.WriteLine($"\tFrom Actor: {filmActor.Actor.FirstName} {filmActor.Actor.LastName}");
+            }
+        }
+
+        public static void LazyLoadCategory()
+        {
+            Console.WriteLine("---------------------------------------------LAZY LOAD FILMS FOR CATEGORIES---------------------------------------------");
+            IEnumerable<Category> categories = MoviesContext.Instance.Categories;
+            foreach (Category category in categories)
+            {
+                MoviesContext.Instance.Entry(category).Collection(c => c.FilmCategory).Load();
+                Console.WriteLine($"Category: {category.Name}");
+                if (category.FilmCategory.Any())
+                {
+                    foreach (FilmCategory filmCategory in category.FilmCategory)
+                    {
+                        MoviesContext.Instance.Entry(filmCategory).Reference(fc => fc.Film).Load();
+                        Console.WriteLine($"\t{filmCategory.Film.FilmId} - {filmCategory.Film.Title}");
+                    }
+                }
+            }
+        }
+
+        public static void EagerLoadFilm()
+        {
+            Console.WriteLine(nameof(EagerLoadFilm));
+        }
+
+        public static void EagerLoadCategory()
+        {
+            Console.WriteLine(nameof(EagerLoadCategory));
+        }
     }
 }
