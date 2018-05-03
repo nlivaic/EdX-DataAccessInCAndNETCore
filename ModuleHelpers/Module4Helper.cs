@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using MovieApp.Entities;
 
 namespace MovieApp
@@ -111,7 +112,27 @@ namespace MovieApp
 
         public static void QueryOptimization()
         {
-            Console.WriteLine(nameof(QueryOptimization));
+            Console.WriteLine("Loading data (inefficient query)...");
+            IEnumerable<Film> films = MoviesContext.Instance.Films;
+            foreach (Film film in films)
+            {
+                MoviesContext.Instance.Entry(film).Collection(f => f.FilmActor).Load();
+                foreach (FilmActor filmActor in film.FilmActor)
+                {
+                    MoviesContext.Instance.Entry(filmActor).Reference(fa => fa.Actor).Load();
+                }
+            }
+            Console.WriteLine("Done.");
+
+            Console.WriteLine("Loading data (efficient query)...");
+            films = MoviesContext.Instance.Films.Include(f => f.FilmActor)
+                                                .ThenInclude(fa => fa.Actor)
+                                                .ToList();
+            foreach (Film film in films)
+            {
+                // Do nothing.
+            }
+            Console.WriteLine("Done.");
         }
 
         public static void DetachedEntities()
