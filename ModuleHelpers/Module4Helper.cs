@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ConsoleTables;
 using Microsoft.EntityFrameworkCore;
 using MovieApp.Entities;
 using MovieApp.Extensions;
@@ -206,12 +207,20 @@ namespace MovieApp
 
         public static void ExecuteRawSql()
         {
-            Console.WriteLine(nameof(ExecuteRawSql));
+            string sql = "SELECT * FROM actor WHERE actorid = ?";
+            IEnumerable<ActorModel> actorModels = MoviesContext.Instance.Actors.FromSql(sql, 2).Select(a => a.Copy<Actor, ActorModel>());
+            ConsoleTable.From(actorModels).Write();
+
+            sql = "SELECT * FROM film LIMIT 1";
+            IEnumerable<FilmModel> filmModels = MoviesContext.Instance.Films.FromSql(sql).Select(f => f.Copy<Film, FilmModel>());
+            ConsoleTable.From(filmModels).Write();
         }
 
         public static void ExecuteStoredProcedure()
         {
-            Console.WriteLine(nameof(ExecuteStoredProcedure));
+            string sql = "call FilmStartsWithTitle({0})";
+            IEnumerable<FilmModel> filmModels = MoviesContext.Instance.Films.FromSql(sql, "t").Select(f => f.Copy<Film, FilmModel>());
+            ConsoleTable.From(filmModels).Write();
         }
 
         public static void SeedDatabase()
