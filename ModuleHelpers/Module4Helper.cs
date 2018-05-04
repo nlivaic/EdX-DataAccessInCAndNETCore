@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using MovieApp.Entities;
+using MovieApp.Extensions;
+using MovieApp.Models;
 
 namespace MovieApp
 {
@@ -135,9 +137,78 @@ namespace MovieApp
             Console.WriteLine("Done.");
         }
 
-        public static void DetachedEntities()
+
+        public static void DetachedEntities1()
         {
-            Console.WriteLine(nameof(DetachedEntities));
+            Console.WriteLine("Working with detached entities -- START --");
+
+            // Untracked entity added to context.
+            Console.WriteLine("Untracked entity added to context.");
+            try
+            {
+                Film film = new Film { FilmId = 1, Title = "test" };
+                MoviesContext.Instance.Films.Add(film);
+                MoviesContext.Instance.SaveChanges();               // Exception thrown here (by the database), since EF is not aware a film with same FilmId exists.
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Untracked entity added to context. \n\tException: {ex.Message}. \n\tInner Exception: {ex.InnerException.Message}");
+            }
+            
+            // Copy of a tracked entity added to context.
+            Console.WriteLine("Copy of a tracked entity added to context.");
+            try
+            {
+                Film film = MoviesContext.Instance.Films.First();
+                Film newFilm = film.Copy<Film, Film>();
+                MoviesContext.Instance.Films.Add(newFilm);          // Exception thrown here (by EF), since "film" is already tracked and "newFilm" has same FilmId value.
+                MoviesContext.Instance.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Copy of a tracked entity reinserted. Exception: {ex.Message}");
+            }
+            Console.WriteLine("Working with detached entities -- FINISH --");
+        }
+
+        public static void DetachedEntities2()
+        {
+            Console.WriteLine("Working with detached entities -- START --");
+
+            // XXXXXXXXXXXXXXXXXX.
+            Console.WriteLine("XXXXXXXXXXXXXXXXXX.");
+            // Retrieve actor's name.
+            const int actorId = 1;
+            string name = MoviesContext.Instance.Actors.Where(a => a.ActorId == actorId).Select(a => $"{a.FirstName} {a.LastName}").First();
+            Console.WriteLine($"Original Name:\t{name}");
+
+            // Create a new actor with the same id as above. Start tracking it.
+            ActorModel actorModel = new ActorModel {
+                ActorId = actorId,
+                FirstName = "Luke",
+                LastName = "Skywalker"
+            };
+            var actor = actorModel.Copy<ActorModel, Actor>();
+            MoviesContext.Instance.Actors.Attach(actor);        // Start tracking. Will attach in Unchanged state.
+            Console.WriteLine("State on update: " + MoviesContext.Instance.Entry(actor).State.ToString());                      // Unchanged.
+            MoviesContext.Instance.Entry(actor).State = EntityState.Modified;       
+            Console.WriteLine("State on update, after change: " + MoviesContext.Instance.Entry(actor).State.ToString());        // Modified.
+            MoviesContext.Instance.SaveChanges();               // SQL generated, since actor is in Modified state.
+            // Name not changed because no update operation was performed.
+            name = MoviesContext.Instance.Actors.Where(a => a.ActorId == actorId).Select(a => $"{a.FirstName} {a.LastName}").First();
+            Console.WriteLine($"Updated Name:\t{name}");
+
+            // Revert values.
+            Console.WriteLine("State on revert, before any change: " + MoviesContext.Instance.Entry(actor).State.ToString());   // Unchanged. Got reset after previous .SaveChanges()
+            actor.FirstName = "Mark";
+            actor.LastName = "Hammil";
+            Console.WriteLine("State on revert: " + MoviesContext.Instance.Entry(actor).State.ToString());                      // Above name update causes the switch to Modified.
+            MoviesContext.Instance.SaveChanges();
+            // Name not changed because no update operation was performed (again).
+            name = MoviesContext.Instance.Actors.Where(a => a.ActorId == actorId).Select(a => $"{a.FirstName} {a.LastName}").First();
+            Console.WriteLine($"Reverted Name:\t{name}");
+
+            Console.WriteLine("Working with detached entities -- FINISH --");
         }
 
         public static void ExecuteRawSql()

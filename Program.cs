@@ -8,7 +8,7 @@ namespace MovieApp
     {
         static void Main(string[] args)
         {
-            Module4Helper.RollbackTransactionBusinessRule();
+            Module4Helper.DetachedEntities2();
         }
     }
 }
