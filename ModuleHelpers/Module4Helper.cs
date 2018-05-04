@@ -140,8 +140,6 @@ namespace MovieApp
 
         public static void DetachedEntities1()
         {
-            Console.WriteLine("Working with detached entities -- START --");
-
             // Untracked entity added to context.
             Console.WriteLine("Untracked entity added to context.");
             try
@@ -168,15 +166,12 @@ namespace MovieApp
             {
                 Console.WriteLine($"Copy of a tracked entity reinserted. Exception: {ex.Message}");
             }
-            Console.WriteLine("Working with detached entities -- FINISH --");
         }
 
         public static void DetachedEntities2()
         {
-            Console.WriteLine("Working with detached entities -- START --");
-
-            // XXXXXXXXXXXXXXXXXX.
-            Console.WriteLine("XXXXXXXXXXXXXXXXXX.");
+            // Detached entities - setting state.
+            Console.WriteLine("Detached entities - setting state.");
             // Retrieve actor's name.
             const int actorId = 1;
             string name = MoviesContext.Instance.Actors.Where(a => a.ActorId == actorId).Select(a => $"{a.FirstName} {a.LastName}").First();
@@ -207,8 +202,6 @@ namespace MovieApp
             // Name not changed because no update operation was performed (again).
             name = MoviesContext.Instance.Actors.Where(a => a.ActorId == actorId).Select(a => $"{a.FirstName} {a.LastName}").First();
             Console.WriteLine($"Reverted Name:\t{name}");
-
-            Console.WriteLine("Working with detached entities -- FINISH --");
         }
 
         public static void ExecuteRawSql()
