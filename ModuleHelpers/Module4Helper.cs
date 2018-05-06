@@ -435,5 +435,16 @@ namespace MovieApp
 
             MoviesContext.Instance.SaveChanges();
         }
+
+        public static void SelfAssessment()
+        {
+            Console.WriteLine("Page size:");
+            int pageSize = Console.ReadLine().ToInt();
+            Console.WriteLine("Page number:");
+            int pageNr = Console.ReadLine().ToInt();
+            string sql = "exec PagedActors({0}, {1})";
+            IEnumerable<ActorModel> actorModels = MoviesContext.Instance.Actors.FromSql(sql, pageSize, pageNr).Select(a => a.Copy<Actor, ActorModel>());
+            ConsoleTable.From(actorModels).Write();
+        }
     }
 }
